@@ -1,0 +1,232 @@
+<!doctype html>
+<!-- Rebecca Layne & Sidra Ijaz -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="author" content="Rebecca Layne & Sidra Ijaz">
+
+  <title>A4 - Colleges that are Worth It</title>
+  <style>
+  h2{
+    font-size: 40px;
+    font-family: Helvetica, sans-serif;
+  }
+  p, label{
+    text-align: center;
+    font-weight: bold;
+    font-family: Helvetica, sans-serif;
+
+  }
+  body{
+    text-align: center;
+  }
+
+  .bar2 {
+    fill: lightcoral;
+}
+
+</style>
+<!--   This is where you should import your style sheet  -->
+<!--  <link rel="stylesheet" href="css/styles.css?v=1.0"> -->
+<script src="https://d3js.org/d3.v5.min.js"></script>
+</head>
+
+<body>
+  <h2>Story 1 - Factors we consider when applying to colleges2</h2>
+
+  <!-- from here below is code related to creating final graphic*** -->
+  <p>You can choose what major category you'd like to look at! </p>
+
+  <div class="col-md-5" id="area1"></div>
+  <div class="col-md-5" id="area2"></div>
+
+  <script src="https://d3js.org/d3-array.v1.min.js"></script>
+  <script src="https://d3js.org/d3-geo.v1.min.js"></script>
+
+  <p>You can also specify what type of school you want to go to!</p>
+  <p>Public or private </p>
+
+  <script>
+    var college_data = []; //global variable to store collee data
+    var currFilteredData = []; //keeps track of current filtered data
+
+    setTimeout(function() {
+    }, 3000);
+
+    //to create bar chart --> referenced https://bl.ocks.org/d3noob/bdf28027e0ce70bd132edc64f1dd7ea4
+    // also referenced https://bl.ocks.org/hrecht/f84012ee860cb4da66331f18d588eee3
+    // also referenced https://bl.ocks.org/d3noob/23e42c8f67210ac6c678db2cd07a747e
+    // Set up size
+
+    var major_data = [{ "major": "Arts", "salary": 43058,},
+                { "major": "Humanities", "salary": 44891,},
+                { "major": "Physical/Life Sciences", "salary": 48920,},
+                { "major": "Social Sciences", "salary": 49354,},
+                //{ "major": "Average", "salary": 49578,},
+                { "major": "Business", "salary": 49719,},
+                { "major": "Computer Science", "salary": 62174,},
+                { "major": "Engineering", "salary": 67321,}];
+
+    //set up margin
+    var margin6 = {top: 40, right: 70, bottom: 200, left: 70},
+        width = 800 - margin6.left - margin6.right,
+        height = 800 - margin6.top - margin6.bottom;
+
+    var barchart2 = d3.select('#area1').append('svg')
+      .attr('width', width + margin6.left + margin6.right)
+      .attr('height', height + margin6.top + margin6.bottom)
+      .append('g')
+      .attr('transform', 'translate(' + margin6.left + ',' + margin6.top + ')');
+
+    //set axes scales
+    var x6 = d3.scaleBand()
+      .domain(major_data.map(function(d) { return d.major; }))
+      .range([0, width]);
+
+    var y6 = d3.scaleLinear()
+      .domain([0, 70000])
+      .range([height, 0]);
+
+    // create bars (rects)
+    barchart2.selectAll(".bar2")
+      .data(major_data)
+      .enter().append("rect")
+      .attr("class", "bar2")
+      .attr("x", function(d) { return x6(d.major) + 5; })
+      .attr("width", x6.bandwidth() - 10)  //add separation between bars
+      .attr("y", function(d) { return y6(d.salary); })
+      .attr("height", function(d) { return height - y6(d.salary); });
+
+    var xAxis6 = d3.axisBottom(x6);
+    var yAxis6 = d3.axisLeft(y6);
+
+    barchart2.append('g')
+      .attr('transform', 'translate(0,0)')
+      .call(yAxis6);
+
+    barchart2.append("g")
+      .attr("transform", "translate(0," + height + ")")
+      .call(xAxis6);
+
+  // add x axis label
+  barchart2.append('text')
+    .attr('transform', "translate(" + (width/2) + " ," + (height + 40) + ")")
+    .style('text-anchor', 'middle')
+    .text("Major Category")
+    .attr("font-family", "Helvetica")
+
+  // add y axis label
+  barchart2.append('text')
+    .attr('transform', "rotate(-90)")
+    .attr("y", 0 - margin6.left)
+    .attr("x", 0 - (height / 2))
+    .attr("dy", "1em")
+    .style('text-anchor', 'middle')
+    .text("Average Early Career Salary ($)")
+    .attr("font-family", "Helvetica")
+
+  //add title to scatterplot
+  barchart2.append('text')
+    .attr("x", width/2)
+    .attr("y", 0 - margin6.top/2)
+    .style('text-anchor', 'middle')
+    .text("Which majors pay off?")
+    .attr("font-family", "Helvetica")
+    .attr("font-size", "25px")
+
+  // add labels bar values
+  barchart2.append('text')
+    .attr("x", width/7 - 45)
+    .attr("y", height*2/12 + 119)
+    .style('text-anchor', 'middle')
+    .text("$43,058")
+    .attr("font-family", "Helvetica")
+    .attr("font-size", "10px")
+
+  barchart2.append('text')
+    .attr("x", width*2/7 - 45)
+    .attr("y", height*2/12 + 104)
+    .style('text-anchor', 'middle')
+    .text("$44,891")
+    .attr("font-family", "Helvetica")
+    .attr("font-size", "10px")
+
+  barchart2.append('text')
+    .attr("x", width*3/7 - 45)
+    .attr("y", height*2/12 + 69)
+    .style('text-anchor', 'middle')
+    .text("$48,920")
+    .attr("font-family", "Helvetica")
+    .attr("font-size", "10px")
+
+  barchart2.append('text')
+    .attr("x", width*4/7 - 45)
+    .attr("y", height*2/12 + 69)
+    .style('text-anchor', 'middle')
+    .text("$49,354")
+    .attr("font-family", "Helvetica")
+    .attr("font-size", "10px")
+
+  barchart2.append('text')
+    .attr("x", width*5/7 - 45)
+    .attr("y", height*2/12 + 66)
+    .style('text-anchor', 'middle')
+    .text("$49,719")
+    .attr("font-family", "Helvetica")
+    .attr("font-size", "10px")
+
+  barchart2.append('text')
+    .attr("x", width*6/7 - 45)
+    .attr("y", height*2/12 - 34)
+    .style('text-anchor', 'middle')
+    .text("$62,174")
+    .attr("font-family", "Helvetica")
+    .attr("font-size", "10px")
+
+  barchart2.append('text')
+    .attr("x", width - 45)
+    .attr("y", height*2/12 - 74)
+    .style('text-anchor', 'middle')
+    .text("$67,321")
+    .attr("font-family", "Helvetica")
+    .attr("font-size", "10px");
+
+  //add horizontal average line: $49,578
+  barchart2.append("line")
+      .attr("x1", 0)
+      .attr("x2", width + 7)
+      .attr("y1", height*4/14 + 4)
+      .attr("y2", height*4/14 + 4)
+      .style("stroke", "blue")
+      .style("stroke-dasharray", "5");
+
+  //add label for horizontal average line
+  barchart2.append('text')
+    .attr("x", width + 30)
+    .attr("y", height*4/14 + 4)
+    .style('text-anchor', 'middle')
+    .text("Average:")
+    .attr("font-family", "Helvetica")
+    .attr("font-size", "10px");
+
+  barchart2.append('text')
+    .attr("x", width + 30)
+    .attr("y", height*4/14 + 15)
+    .style('text-anchor', 'middle')
+    .text("$49,578")
+    .attr("font-family", "Helvetica")
+    .attr("font-size", "10px");
+
+</script>
+
+<body>
+  <p>I can add more text here</p>
+</body>
+
+
+<script src="https://d3js.org/d3.v4.js"></script>
+<script src="https://unpkg.com/d3-simple-slider"></script>
+
+
+</body>
+</html>

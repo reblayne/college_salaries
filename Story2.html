@@ -1,0 +1,346 @@
+<!doctype html>
+<!-- Rebecca Layne & Sidra Ijaz -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="author" content="Rebecca Layne & Sidra Ijaz">
+
+  <title>A4 - Colleges that are Worth It</title>
+  <style>
+  h2{
+    font-size: 40px;
+    font-family: Helvetica, sans-serif;
+  }
+  p, label{
+    text-align: center;
+    font-weight: bold;
+    font-family: Helvetica, sans-serif;
+
+  }
+  body{
+    text-align: center;
+  }
+
+
+  .tooltip {
+    position: absolute;
+    width: 200px;
+    height: 85px;
+    pointer-events: none;
+    background-color: lightblue;
+    font-size: 12px;
+    font-family: Helvetica, sans-serif;
+  }
+
+</style>
+<!--   This is where you should import your style sheet  -->
+<!--  <link rel="stylesheet" href="css/styles.css?v=1.0"> -->
+<script src="https://d3js.org/d3.v5.min.js"></script>
+</head>
+
+<body>
+  <h2>Story 2 - Let's pay attention to money!</h2>
+
+  <!-- from here below is code related to creating final graphic*** -->
+  <p>You can choose what major category you'd like to look at! </p>
+
+  <div class="col-md-5" id="area5"></div>
+
+
+  <script src="https://d3js.org/d3-array.v1.min.js"></script>
+  <script src="https://d3js.org/d3-geo.v1.min.js"></script>
+
+  <p>You can also specify what type of school you want to go to!</p>
+  <p>Public or private </p>
+
+  <script>
+  var college_data = []; //global variable to store collee data
+  var currFilteredData = []; //keeps track of current filtered data
+
+  setTimeout(function() {
+  }, 3000);
+
+  //Create scatter plot --> referenced http://bl.ocks.org/weiglemc/6185069
+  // also referenced http://bl.ocks.org/bunkat/2595950
+  // also referenced https://bl.ocks.org/d3noob/23e42c8f67210ac6c678db2cd07a747e
+  // Set up size
+  var margin5 = {top: 40, right: 70, bottom: 100, left: 70},
+  width = 1000 - margin5.left - margin5.right,
+  height = 700 - margin5.top - margin5.bottom;
+
+  // setup x
+  var x5 = d3.scaleLinear()
+  .domain([0, 70000])
+  .range([0, width]);
+
+  var y5 = d3.scaleLinear()
+  .domain([30000, 85000])
+  .range([height, 0]);
+
+  /* Add an SVG element to the DOM*/
+  var scatterplot3 = d3.select('#area5').append('svg')
+  .attr('width', width + margin5.left + margin5.right)
+  .attr('height', height + margin5.top + margin5.bottom)
+  .append('g')
+  .attr('transform', 'translate(' + margin5.left + ',' + margin5.top + ')');
+
+
+  //add background colors
+  scatterplot3.append("rect")
+  .attr("width", width/2)
+  .attr("height", height*7/11)
+  .attr("fill", "limegreen")
+  .style("opacity", .2);
+
+  scatterplot3.append("rect")
+  .attr("x", width/2)
+  .attr("y", 0)
+  .attr("width", width/2)
+  .attr("height", height*7/11)
+  .attr("fill", "limegreen")
+  .style("opacity", .05);
+
+  scatterplot3.append("rect")
+  .attr("x", width/2)
+  .attr("y", height*7/11)
+  .attr("width", width/2)
+  .attr("height", height*4/11)
+  .attr("fill", "red")
+  .style("opacity", .2);
+
+  scatterplot3.append("rect")
+  .attr("x", 0)
+  .attr("y", height*7/11)
+  .attr("width", width/2)
+  .attr("height", height*4/11)
+  .attr("fill", "red")
+  .style("opacity", .05);
+
+
+  // label axis
+  scatterplot3.append('text')
+  .attr("x", 100)
+  .attr("y", 10)
+  .attr("dy", "1em")
+  .style('text-anchor', 'middle')
+  .text("Low Cost, High Salary")
+  .attr("fill", "green")
+  .attr("font-family", "Helvetica")
+  .attr("font-size", "18px")
+
+  scatterplot3.append('text')
+  .attr("x", 100)
+  .attr("y", height - 30)
+  .attr("dy", "1em")
+  .style('text-anchor', 'middle')
+  .text("Low Cost, Low Salary")
+  .attr("fill", "lightsalmon")
+  .attr("font-family", "Helvetica")
+  .attr("font-size", "18px")
+
+  scatterplot3.append('text')
+  .attr("x", 5/8*width - 30 + 25)
+  .attr("y", 10)
+  .attr("dy", "1em")
+  .style('text-anchor', 'middle')
+  .text("High Cost, High Salary")
+  .attr("fill", "yellowgreen")
+  .attr("font-family", "Helvetica")
+  .attr("font-size", "18px")
+
+  scatterplot3.append('text')
+  .attr("x", 5/8*width - 30 + 25)
+  .attr("y", height - 30)
+  .attr("dy", "1em")
+  .style('text-anchor', 'middle')
+  .text("High Cost, Low Salary")
+  .attr("fill", "red")
+  .attr("font-family", "Helvetica")
+  .attr("font-size", "18px")
+
+  // legend for public/private
+  scatterplot3.append('text')
+  .attr("x", width - 22)
+  .attr("y", height - 30)
+  .attr("dy", "1em")
+  .style('text-anchor', 'middle')
+  .text("Public")
+  .attr("fill", "black")
+  .attr("font-family", "Helvetica")
+  .attr("font-size", "12px")
+  //
+  scatterplot3.append('text')
+  .attr("x", width - 20)
+  .attr("y", height - 15)
+  .attr("dy", "1em")
+  .style('text-anchor', 'middle')
+  .text("Private")
+  .attr("fill", "black")
+  .attr("font-family", "Helvetica")
+  .attr("font-size", "12px")
+
+  scatterplot3.append('circle')
+  .attr("cx", width - 47)
+  .attr("cy", height - 22)
+  .attr("r", "5")
+  .attr("fill", "royalblue")
+
+  scatterplot3.append('circle')
+  .attr("cx", width - 47)
+  .attr("cy", height - 7)
+  .attr("r", "5")
+  .attr("fill", "crimson")
+
+
+  //add tooltip to label points
+  var tooltip = d3.select("body").append("div")
+  .attr("class", "tooltip")
+  .style("opacity", 0);
+
+  // add x axis
+  var xAxis5 = d3.axisBottom(x5); //.tickFormat(function(d){ return d.starting_salary;});;
+
+  scatterplot3.append('g')
+  .attr('transform', 'translate(0,' + height + ')')
+  .call(xAxis5);
+
+  // add x axis label
+  scatterplot3.append('text')
+  .attr('transform', "translate(" + (width/2) + " ," + (height + 40) + ")")
+  .style('text-anchor', 'middle')
+  .text("Average Cost of Attendence ($)")
+  .attr("font-family", "Helvetica")
+
+  // add y axis
+  var yAxis5 = d3.axisLeft(y5);
+
+  scatterplot3.append('g')
+  .attr('transform', 'translate(0,0)')
+  .call(yAxis5);
+
+  // add y axis label
+  scatterplot3.append('text')
+  .attr('transform', "rotate(-90)")
+  .attr("y", 0 - margin5.left)
+  .attr("x",0 - (height / 2))
+  .attr("dy", "1em")
+  .style('text-anchor', 'middle')
+  .text("Average Early Career Salary ($)")
+  .attr("font-family", "Helvetica")
+
+  //add title to scatterplot3
+  scatterplot3.append('text')
+  .attr("x", width/2)
+  .attr("y", 0 - margin5.top/2)
+  .style('text-anchor', 'middle')
+  .text("Which schools are worth it?")
+  .attr("font-family", "Helvetica")
+  .attr("font-size", "25px")
+
+  // function that formats numbers as currency in US Dollars
+  // function taken from https://flaviocopes.com/how-to-format-number-as-currency-javascript/
+  const money_formatter = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 2
+  })
+
+  var number_formatter = d3.format(",")
+  var percentage_formatter = d3.format(",.2%");
+
+  //load in data
+  /*Store data set of colleges*/
+  d3.csv("College Data for JS.csv", parseRowInput).then(load);  //parse and load data
+  // load data in
+  function parseRowInput(d) {
+    return {
+      school_name: d["School Name"],
+      city: d["City"],
+      state: d["State"],
+      zip: d["Zip"],
+      lat: d["Latitude"],
+      log: d["Longitude"],
+      acceptance_rate: d["Acceptance Rate"],
+      undergrads: d["Undergrads"],
+      public_private: d["Public/Private"],
+      tuition: d["Tuition (In State)"],
+      cost: d["Average Cost of Attendence"],
+      major_category: d["Salary Category"],   // Avg, CS, Humanities...
+      salary: d["Average Early Career Pay"]
+    };
+  }
+
+  /*Plot data points on map*/
+  function load(data) {
+    college_data = data;
+    currFilteredData = filterByMajorCategory(college_data, "Average"); //initialize current data to only average points
+    scatterplot3.selectAll("ellipse")
+    .data(currFilteredData)
+    .enter()
+    .append("ellipse")
+    .attr("rx", function(d) { return Math.log(d.undergrads) - 3})
+    .attr("ry", function(d) { return Math.log(d.undergrads) - 3})  //size of point based on number of undergrads
+    .attr("cx", function(d,i) { return x5(d.cost)})
+    .attr("cy", function(d) {
+      return y5(d.salary)})
+      .on('mouseover', function(d) {  //when you hover over point
+        tooltip.transition()
+        .duration(500)
+        .style("opacity", .9);
+        tooltip.html(d.school_name + "<br/> Average Salary: "
+        + money_formatter.format(d.salary)
+        + "<br/> Average Cost: " + money_formatter.format(d.cost)
+        + "<br/> Acceptance Rate: " + percentage_formatter(d.acceptance_rate)
+        + "<br/> Undergraduates: " + number_formatter(d.undergrads))
+        .style("left", (d3.event.pageX + 10) + "px")
+        .style("top", (d3.event.pageY) + "px")
+        d3.select(this)
+        .transition()
+        .attr("rx", 12)   //zoom in on point when selected
+        .attr("ry", 12);
+      })
+      .on('mouseout', function() {  //when you leave point
+        tooltip.transition()
+        .duration(500)
+        .style("opacity", 0);
+        d3.select(this)
+        .transition()
+        .duration(500)
+        .attr("rx", function(d) { return Math.log(d.undergrads) - 3})
+        .attr("ry", function(d) { return Math.log(d.undergrads) - 3})
+      })
+      .style("fill", function(d) {
+        if (d.public_private == "Public") {
+          return "royalblue"
+        } else if (d.public_private == "Private") {
+          return "crimson"
+        }
+      }
+    );
+  }
+
+
+  // filters data by major category
+  function filterByMajorCategory(data, type) {
+    var filteredData = []
+    for (var i = 0; i < data.length; i++) {
+      var dataPoint = data[i]
+      if (dataPoint.major_category == type) {
+        filteredData.push(dataPoint)
+      }
+    }
+    return filteredData
+  }
+
+</script>
+
+<script src="https://d3js.org/d3.v4.js"></script>
+<script src="https://unpkg.com/d3-simple-slider"></script>
+
+</script>
+
+</script>
+
+
+</body>
+</html>

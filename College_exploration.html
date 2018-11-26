@@ -1,0 +1,666 @@
+<!doctype html>
+<!-- Sidra Ijaz & Rebecca Layne -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="author" content="Rebecca Layne & Sidra Ijaz">
+
+  <title>A4 - Colleges that are Worth It</title>
+  <style>
+  h2{
+    font-size: 40px;
+    font-family: Helvetica, sans-serif;
+  }
+  button {
+    padding:10px 30px;
+    border-radius:30px;
+    border:none;
+    font-weight: bold;
+    margin: 5px;
+    color: black;
+  }
+  h1 {
+    font-size: 50px;
+    font-family: Helvetica, sans-serif;
+  }
+  button#state {
+    background-color: red
+  }
+  button#engineering {
+    background-color: orange
+  }
+  button#arts {
+    background-color: blue
+  }
+  button#ivy {
+    background-color: green
+  }
+  button#all {
+    background-color: gray
+  }
+  #type{
+    font-size: 20px;
+    font-family: Helvetica, sans-serif;
+  }
+  #box{
+    border-style: : solid;
+    border-color: black;
+    border-radius: 1
+  }
+  p, label{
+    text-align: center;
+    font-weight: bold;
+    font-family: Helvetica, sans-serif;
+
+  }
+  body{
+    text-align: center;
+  }
+
+  .tooltip {
+  position: absolute;
+  width: 200px;
+  height: 85px;
+  pointer-events: none;
+  background-color: lightblue;
+  font-size: 12px;
+  font-family: Helvetica, sans-serif;
+}
+
+
+/* #tooltip {
+            position: absolute;
+            width: 230px;
+            height: auto;
+            padding: 10px;
+            background-color: white;
+            -webkit-border-radius: 10px;
+            -moz-border-radius: 10px;
+            border-radius: 10px;
+            -webkit-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+            -moz-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+            box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+            pointer-events: none;
+        }
+
+        #tooltip.hidden {
+            display: none;
+        }
+
+        #tooltip p {
+            margin: 0;
+            font-family: sans-serif;
+            font-size: 16px;
+            line-height: 20px;
+        } */
+
+</style>
+<!--   This is where you should import your style sheet  -->
+<!--  <link rel="stylesheet" href="css/styles.css?v=1.0"> -->
+<script src="https://d3js.org/d3.v5.min.js"></script>
+</head>
+
+<body>
+  <h2>Colleges That Are Worth It</h2>
+  <section id = "box">
+    <span id = "type"> Type: </span>
+    <button id="state" data-filter="State" > State</button>
+    <button id="engineering" data-filter="Engineering"> Engineering</button>
+    <button id="arts" data-filter="Liberal Arts"> Liberal Arts</button>
+    <button id="ivy" data-filter="Ivy League"> Ivy League</button>
+    <button id="gray" data-filter=""> All</button>
+  </section>
+  <p>Move the purple and blue dots to begin filtering out resteraunts by location distance!</p>
+  <p>Drag the sliders below to adjust the radii of each location!</p>
+  <div id="visualization_area"></div>
+
+  <script src="https://d3js.org/d3-array.v1.min.js"></script>
+  <script src="https://d3js.org/d3-geo.v1.min.js"></script>
+
+  <script>
+  var college_data = []; //global variable to store collee data
+  var currFilteredData = []; //keeps track of current filtered data
+  var currButton = "All"; // current button pressed
+  var acceptance_rate_upper = 1; //upper limit on acceptance rate
+  var undergrads_upper = 20934802938490; //upper limit on undergrads FIX THIS
+
+
+    setTimeout(function() {
+    }, 3000);
+
+  //Create scatter plot --> referenced http://bl.ocks.org/weiglemc/6185069
+  // also referenced http://bl.ocks.org/bunkat/2595950
+  // also referenced https://bl.ocks.org/d3noob/23e42c8f67210ac6c678db2cd07a747e
+  // Set up size
+  var margin = {top: 40, right: 70, bottom: 200, left: 70},
+      width = 760 - margin.left - margin.right,
+      height = 800 - margin.top - margin.bottom;
+
+  // setup x
+  var x = d3.scaleLinear()
+    //  .domain([0, d3.max(college_data, function(d) {return d["starting_salary"]})])
+      .domain([30000, 80000])  //  .domain([0, d3.max(data, function(d) { return d[0]; })])
+      .range([0, width]);
+
+  var y = d3.scaleLinear()
+      .domain([0, 75000])
+      .range([height, 0]);
+</script>
+
+<body>
+  <p>I can add more text here</p>
+</body>
+
+<script>
+  /* Add an SVG element to the DOM*/
+  var scatterplot = d3.select('body').append('svg')
+  .attr('width', width + margin.left + margin.right)
+  .attr('height', height + margin.top + margin.bottom)
+  .append('g')
+  .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
+
+  //add background colors
+  scatterplot.append("rect")
+    .attr("width", width/2)
+    .attr("height", height/2)
+    .attr("fill", "limegreen")
+    .style("opacity", .3);
+
+  scatterplot.append("rect")
+      .attr("x", width/2)
+      .attr("y", 0)
+      .attr("width", width/2)
+      .attr("height", height/2)
+      .attr("fill", "limegreen")
+      .style("opacity", .1);
+
+  scatterplot.append("rect")
+      .attr("x", width/2)
+      .attr("y", height/2)
+      .attr("width", width/2)
+      .attr("height", height/2)
+      .attr("fill", "red")
+      .style("opacity", .3);
+
+  scatterplot.append("rect")
+      .attr("x", 0)
+      .attr("y", height/2)
+      .attr("width", width/2)
+      .attr("height", height/2)
+      .attr("fill", "red")
+      .style("opacity", .1);
+
+
+      //add legend for background colors
+      scatterplot.append("rect")
+        .attr("x", 1/8*width - 30)
+        .attr("y", height + margin.bottom/2 - 20)
+        .attr("width", 60)
+        .attr("height", 50)
+        .attr("fill", "pink")
+        .style("opacity", .3);
+
+      scatterplot.append("rect")
+          .attr("x", 3/8*width - 30)
+          .attr("y", height + margin.bottom/2 - 20)
+          .attr("width", 60)
+          .attr("height", 50)
+          .attr("fill", "limegreen")
+          .style("opacity", .3);
+
+      scatterplot.append("rect")
+          .attr("x", 5/8*width - 30)
+          .attr("y", height + margin.bottom/2 - 20)
+          .attr("width", 60)
+          .attr("height", 50)
+          .attr("fill", "yellow")
+          .style("opacity", .3);
+
+      scatterplot.append("rect")
+          .attr("x", 7/8*width - 30)
+          .attr("y", height + margin.bottom/2 - 20)
+          .attr("width", 60)
+          .attr("height", 50)
+          .attr("fill", "steelblue")
+          .style("opacity", .3);
+
+      // label axis
+      scatterplot.append('text')
+        .attr("x", 1/8*width - 30 + 25)
+        .attr("y", height + margin.bottom/2 - 20 + 50)
+        .attr("dy", "1em")
+        .style('text-anchor', 'middle')
+        .text("High Cost, Low Salary")
+        .attr("font-family", "Helvetica")
+        .attr("font-size", "12px")
+
+      scatterplot.append('text')
+        .attr("x", 3/8*width - 30 + 25)
+        .attr("y", height + margin.bottom/2 - 20 + 50)
+        .attr("dy", "1em")
+        .style('text-anchor', 'middle')
+        .text("High Cost, High Salary")
+        .attr("font-family", "Helvetica")
+        .attr("font-size", "12px")
+
+      scatterplot.append('text')
+        .attr("x", 5/8*width - 30 + 25)
+        .attr("y", height + margin.bottom/2 - 20 + 50)
+        .attr("dy", "1em")
+        .style('text-anchor', 'middle')
+        .text("Low Cost, High Salary")
+        .attr("font-family", "Helvetica")
+        .attr("font-size", "12px")
+
+      scatterplot.append('text')
+        .attr("x", 7/8*width - 30 + 25)
+        .attr("y", height + margin.bottom/2 - 20 + 50)
+        .attr("dy", "1em")
+        .style('text-anchor', 'middle')
+        .text("Low Cost, Low Salary")
+        .attr("font-family", "Helvetica")
+        .attr("font-size", "12px")
+
+
+
+
+  // svg.append("g")
+  //     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+
+
+  //add tooltip to label points
+  var tooltip = d3.select("body").append("div")
+    .attr("class", "tooltip")
+    .style("opacity", 0);
+
+  //var main = scatterplot.append('g')
+
+
+   // add x axis
+   var xAxis = d3.axisBottom(x); //.tickFormat(function(d){ return d.starting_salary;});;
+
+   scatterplot.append('g')
+  	.attr('transform', 'translate(0,' + height + ')')
+  //	.attr('class', 'main axis date')
+  	.call(xAxis);
+
+  // add x axis label
+  scatterplot.append('text')
+    .attr('transform', "translate(" + (width/2) + " ," + (height + 40) + ")")
+    .style('text-anchor', 'middle')
+    .text("Starting Median Salary")
+    .attr("font-family", "Helvetica")
+
+    // add y axis
+    var yAxis = d3.axisLeft(y);
+
+    scatterplot.append('g')
+  	.attr('transform', 'translate(0,0)')
+  //	.attr('class', 'main axis date')
+  	.call(yAxis);
+
+    // add y axis label
+    scatterplot.append('text')
+      .attr('transform', "rotate(-90)")
+      .attr("y", 0 - margin.left)
+      .attr("x",0 - (height / 2))
+      .attr("dy", "1em")
+      .style('text-anchor', 'middle')
+      .text("Average Cost of Attendence")
+      .attr("font-family", "Helvetica")
+
+    //add title to scatterplot
+    scatterplot.append('text')
+      .attr("x", width/2)
+      .attr("y", 0 - margin.top/2)
+      .style('text-anchor', 'middle')
+      .text("Title of Scatter Plot")
+      .attr("font-family", "Helvetica")
+      .attr("font-size", "25px")
+
+
+
+  //  var g = main.append("g");
+
+    // g.selectAll("scatter-dots")
+    //     .data(college_data)
+    //     .enter().append("svg:circle")
+    //     .attr("cx", function (d,i) { return x(d.starting_salary); } )
+    //     .attr("cy", function (d) { return y(d.cost); } )
+    //     .attr("r", 5);
+
+    // function that formats numbers as currency in US Dollars
+    // function taken from https://flaviocopes.com/how-to-format-number-as-currency-javascript/
+    const money_formatter = new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        minimumFractionDigits: 2
+    })
+
+    var number_formatter = d3.format(",")
+     var percentage_formatter = d3.format(",.2%");
+
+
+        //load in data
+        /*Store data set of colleges*/
+        d3.csv("US_College_Data_Final copy.csv", parseRowInput).then(load);  //parse and load data
+        // load data in
+        function parseRowInput(d) {
+          return {
+            school_name: d["School Name"],
+            city: d["City"],
+            state: d["State"],
+            region: d["Region"],
+            zip: d["Zip"],
+            lat: d["Latitude"],
+            log: d["Longitude"],
+            acceptance_rate: d["Acceptance Rate"],
+            undergrads: d["Undergrads"],
+            tuition: d["Tuition (In-State)"],
+            cost: d["Average Cost of Attendence"],
+            school_type: d["School Type"],
+            starting_salary: d["Starting Median Salary"]
+          };
+        }
+
+        /*Plot data points on map*/
+        function load(data) {
+          college_data = data;
+          currFilteredData = college_data; //initialize current intersected data to all points
+          console.log(college_data[1]["cost"])
+          //console.log(college_data["Average Cost of Attendence"])
+          console.log(college_data)
+          scatterplot.selectAll("ellipse")
+          .data(college_data)
+          .enter()
+          .append("ellipse")
+          //.attr("rx",	5)
+          .attr("rx", function(d) { return Math.log(d.undergrads) - 3})
+          .attr("ry", function(d) { return Math.log(d.undergrads) - 3})  //size of point based on number of undergrads
+          //.attr("ry", 5)
+          .attr("cx", function(d,i) { return x(d.starting_salary)})
+          .attr("cy", function(d) {
+            console.log(d.cost)
+            return y(d.cost)})
+          .on('mouseover', function(d) {  //when you hover over point
+              tooltip.transition()
+                .duration(500)
+                .style("opacity", .9);
+              tooltip.html(d.school_name + "<br/> Median Starting Salary: "
+              + money_formatter.format(d.starting_salary)
+              + "<br/> Average Cost: " + money_formatter.format(d.cost)
+              + "<br/> Acceptance Rate: " + percentage_formatter(d.acceptance_rate)
+              + "<br/> Undergraduates: " + number_formatter(d.undergrads))
+                .style("left", (d3.event.pageX + 10) + "px")
+                .style("top", (d3.event.pageY) + "px")
+              d3.select(this)
+                .transition()
+                .attr("rx", 12)   //zoom in on point when selected
+                .attr("ry", 12);
+          })
+          .on('mouseout', function() {  //when you leave point
+              tooltip.transition()
+                .duration(500)
+                .style("opacity", 0);
+              d3.select(this)
+                .transition()
+                .duration(500)
+                .attr("rx", function(d) { return Math.log(d.undergrads) - 3})
+                .attr("ry", function(d) { return Math.log(d.undergrads) - 3})
+          })
+          .style("fill", function(d) {
+            if (d.school_type == "State") {
+              return "red"
+            } else if (d.school_type == "Engineering") {
+              return "orange"
+            } else if (d.school_type == "Liberal Arts") {
+              return "blue"
+            } else if (d.school_type == "Ivy League") {
+              return "green"
+            }
+          }
+        );
+        }
+
+
+//////FILTER FUNCTIONS
+
+    // starts with full dataset, calls all filters and updates graph
+    function callAllFilters(allData, currButton, acceptanceUpperLimit, undergradsUpperLimit) {
+      var filteredData = allData
+      filteredData = filterBySchoolType(filteredData, currButton)
+      filteredData = filterByAcceptanceRate(filteredData, acceptanceUpperLimit)
+      filteredData = filterByNumUndergrads(filteredData, undergradsUpperLimit)
+
+      updateGraph(filteredData)
+    }
+
+    // filters data by school type, updates scatterplot
+    function filterBySchoolType(data, type) {
+        var filteredData = []
+        for (var i = 0; i < data.length; i++) {
+            var dataPoint = data[i]
+            if (dataPoint.school_type == type) {
+                filteredData.push(dataPoint)
+            } else if (type == "All") {
+                filteredData.push(dataPoint)
+            }
+        }
+        return filteredData
+    }
+
+    /* Returns filtered data set with only the points below the acceptance rate limit*/
+    function filterByAcceptanceRate(data, upper) {
+      var filteredData = []
+      for (var i = 0; i < data.length; i++) {
+          var dataPoint = data[i]
+          if (dataPoint.acceptance_rate <= upper) {
+            filteredData.push(dataPoint)
+          }
+      }
+      return filteredData
+    }
+
+    /* Returns filtered data set with only the points below the undergrad limit*/
+    function filterByNumUndergrads(data, upper) {
+      var filteredData = []
+      for (var i = 0; i < data.length; i++) {
+          var dataPoint = data[i]
+          if (dataPoint.undergrads <= upper) {
+            filteredData.push(dataPoint)
+          }
+      }
+      return filteredData
+    }
+
+
+//////FILTER FUNCTIONS ^^^
+
+
+    /*Keeps track of what button is clicked and calls filter function*/
+    let buttons = d3.selectAll("button");
+    buttons.on("click", function() {
+      let selectedButton = this.dataset.filter; //value of data-filter
+      if (selectedButton == "State") {
+        currButton = "State"
+      } else if (selectedButton == "Engineering") {
+        currButton = "Engineering"
+      } else if (selectedButton == "Liberal Arts") {
+        currButton = "Liberal Arts"
+      } else if (selectedButton == "Ivy League") {
+        currButton = "Ivy League"
+      } else {
+        currButton = "All"
+      }
+      // filterBySchoolType(currButton) //filter data based on button and intersection
+      callAllFilters(college_data, currButton, acceptance_rate_upper, undergrads_upper)
+    })
+
+
+    /*Update points that appear on scatterplot*/
+    function updateGraph(filteredData) {
+      let circles = scatterplot.selectAll("ellipse")
+      let updatedCircles = circles.data(filteredData, d => d.id) //
+      .on('mouseover', function(d) {  //when you hover over point
+          tooltip.transition()
+            .duration(500)
+            .style("opacity", .9);
+          tooltip.html(d.school_name + "<br/> Median Starting Salary: "
+          + money_formatter.format(d.starting_salary)
+          + "<br/> Average Cost: " + money_formatter.format(d.cost))
+            .style("left", (d3.event.pageX - 10) + "px")
+            .style("top", (d3.event.pageY - 10) + "px")
+          d3.select(this)
+            .transition()
+            .attr("rx", 12)
+            .attr("ry", 12);
+      })
+      .on('mouseout', function() {  //when you leave point
+          tooltip.transition()
+            .duration(500)
+            .style("opacity", 0);
+          d3.select(this)
+            .transition()
+            .duration(500)
+            .attr("rx", function(d) { return Math.log(d.undergrads) - 3})
+            .attr("ry", function(d) { return Math.log(d.undergrads) - 3})
+      })
+      .style("fill", function(d) {
+        if (d.school_type == "State") {
+          return "red"
+        } else if (d.school_type == "Engineering") {
+          return "orange"
+        } else if (d.school_type == "Liberal Arts") {
+          return "blue"
+        } else if (d.school_type == "Ivy League") {
+          return "green"
+        }
+      });
+      let enterSelection = updatedCircles.enter();
+      let newCircles = enterSelection.append("ellipse")
+      .attr("rx", function(d) { return Math.log(d.undergrads) - 3})
+      .attr("ry", function(d) { return Math.log(d.undergrads) - 3})
+      .attr("cx",	function(d)	{	return x(d.starting_salary);	})
+      .attr("cy",	function(d)	{	return y(d.cost);	})
+      .on('mouseover', function(d) {  //when you hover over point
+          tooltip.transition()
+            .duration(500)
+            .style("opacity", .9);
+          tooltip.html(d.school_name + "<br/> Median Starting Salary: "
+          + money_formatter.format(d.starting_salary)
+          + "<br/> Average Cost: " + money_formatter.format(d.cost))
+            .style("left", (d3.event.pageX + 10) + "px")
+            .style("top", (d3.event.pageY) + "px")
+          d3.select(this)
+            .transition()
+            .attr("rx", 12)
+            .attr("ry", 12);
+      })
+      .on('mouseout', function() {  //when you leave point
+          tooltip.transition()
+            .duration(500)
+            .style("opacity", 0);
+          d3.select(this)
+            .transition()
+            .duration(500)
+            .attr("rx", function(d) { return Math.log(d.undergrads) - 3})
+            .attr("ry", function(d) { return Math.log(d.undergrads) - 3})
+      })
+      .style("fill", function(d) {
+        if (d.school_type == "State") {
+          return "red"
+        } else if (d.school_type == "Engineering") {
+          return "orange"
+        } else if (d.school_type == "Liberal Arts") {
+          return "blue"
+        } else if (d.school_type == "Ivy League") {
+          return "green"
+        }
+      });
+      let unselectedCircles = updatedCircles.exit();
+      updatedCircles.exit().remove();
+    }
+
+    </script>
+
+    <script src="https://d3js.org/d3.v4.js"></script>
+    <script src="https://unpkg.com/d3-simple-slider"></script>
+
+    <p>Adjust the radii distance in miles</p>
+    <label for="acceptance_rate_slidername" style = "color:purple">Acceptance Rate Upper Bound<div id="acceptance_rate_slider"></div></label>
+    <label for="undergrads_slidername" style = "color:purple">Number of Undergrads Upper Bound<div id="undergrads_slider"></div></label>
+
+    <script>
+
+
+    /*Slider for acceptance rate, show only schools with acceptance rate below number specified*/
+    var acceptance_rate_slider = d3.sliderHorizontal()
+      .min(0)
+    // use this to get min once data is cleaned without nulls
+    // d3.min(college_data, function(d) { return d.acceptance_rate; }));
+      .max(1)
+      .step(0.05)
+      .width(250)
+      .displayValue(false)
+      .default(1)   //slider starts at tick 1
+      .on('onchange', val => {
+          console.log(val)
+          // currFilteredData = filterByAcceptanceRate(val)
+          acceptance_rate_upper = val
+          callAllFilters(college_data, currButton, acceptance_rate_upper, undergrads_upper)
+          console.log(currFilteredData.length)
+          // filterBySchoolType(currButton)
+    });
+
+    d3.select("#acceptance_rate_slider").append("svg")
+      .attr("width", 500)
+      .attr("height", 100)
+      .attr("name", "acceptance_rate_slidername")
+      .append("g")
+      .attr("transform", "translate(30,30)")
+      .call(acceptance_rate_slider);
+
+
+      /*Slider for number of undergrads, show only schools with number of undergrads below number specified*/
+      var undergrads_slider = d3.sliderHorizontal()
+        .min(0)
+      // use this to get min once data is cleaned without nulls
+      // d3.min(college_data, function(d) { return d.acceptance_rate; }));
+        .max(80000)   //adjust max
+        .step(500)
+        .width(250)
+        .displayValue(false)
+        .default(80000)   //slider starts at tick 80000
+        .on('onchange', val => {
+            console.log(val)
+            // currFilteredData = filterByAcceptanceRate(val)
+            undergrads_upper = val  //keep track of number of undergrads specified
+            callAllFilters(college_data, currButton, acceptance_rate_upper, undergrads_upper)
+            console.log(currFilteredData.length)
+            // filterBySchoolType(currButton)
+      });
+
+      d3.select("#undergrads_slider").append("svg")
+        .attr("width", 500)
+        .attr("height", 100)
+        .attr("name", "undergrads_slidername")
+        .append("g")
+        .attr("transform", "translate(30,30)")
+        .call(undergrads_slider);
+
+    </script>
+
+
+
+
+
+
+    </script>
+
+  </script>
+
+
+</body>
+</html>

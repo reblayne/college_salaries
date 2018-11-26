@@ -1,0 +1,175 @@
+<!doctype html>
+<!-- Rebecca Layne & Sidra Ijaz -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="author" content="Rebecca Layne & Sidra Ijaz">
+
+  <title>A4 - Colleges that are Worth It</title>
+  <style>
+  h2{
+    font-size: 40px;
+    font-family: Helvetica, sans-serif;
+  }
+  p, label{
+    text-align: center;
+    font-weight: bold;
+    font-family: Helvetica, sans-serif;
+
+  }
+  body{
+    text-align: center;
+  }
+
+  .bar {
+    fill: green;
+  }
+
+</style>
+<!--   This is where you should import your style sheet  -->
+<!--  <link rel="stylesheet" href="css/styles.css?v=1.0"> -->
+<script src="https://d3js.org/d3.v5.min.js"></script>
+</head>
+
+<body>
+  <h2>Story 1 - Factors we consider when applying to colleges2</h2>
+
+  <!-- from here below is code related to creating final graphic*** -->
+  <p>You can choose what major category you'd like to look at! </p>
+
+  <div class="col-md-5" id="area1"></div>
+  <div class="col-md-5" id="area2"></div>
+
+  <script src="https://d3js.org/d3-array.v1.min.js"></script>
+  <script src="https://d3js.org/d3-geo.v1.min.js"></script>
+
+  <p>You can also specify what type of school you want to go to!</p>
+  <p>Public or private </p>
+
+  <script>
+    var college_school_type_data = []; //global variable to store collee data
+    var currFilteredData = []; //keeps track of current filtered data
+
+    setTimeout(function() {
+    }, 3000);
+
+    //to create bar chart --> referenced https://bl.ocks.org/d3noob/bdf28027e0ce70bd132edc64f1dd7ea4
+    // also referenced https://bl.ocks.org/hrecht/f84012ee860cb4da66331f18d588eee3
+    // also referenced https://bl.ocks.org/d3noob/23e42c8f67210ac6c678db2cd07a747e
+    // Set up size
+
+    // var data = [{ "major": "Arts", "salary": 43058,},
+    //             { "major": "Humanities", "salary": 44891,},
+    //             { "major": "Physical/Life Sciences", "salary": 48920,},
+    //             { "major": "Social Sciences", "salary": 49354,},
+    //             //{ "major": "Average", "salary": 49578,},
+    //             { "major": "Business", "salary": 49719,},
+    //             { "major": "Computer Science", "salary": 62174,},
+    //             { "major": "Engineering", "salary": 67321,}];
+
+    var school_type_data = [{ "type": "Public", "salary": 50076,},
+    { "type": "Private", "salary": 51639,}];
+
+    //set up margin2
+    var margin2 = {top: 40, right: 70, bottom: 200, left: 70},
+      width = 400 - margin2.left - margin2.right,
+      height = 650 - margin2.top - margin2.bottom;
+
+    var barchart = d3.select('#area2').append('svg')
+      .attr('width', width + margin2.left + margin2.right)
+      .attr('height', height + margin2.top + margin2.bottom)
+      .append('g')
+      .attr('transform', 'translate(' + margin2.left + ',' + margin2.top + ')');
+
+    //set axes scales
+    var x2 = d3.scaleBand()
+      .domain(school_type_data.map(function(d) { return d.type; }))
+      .range([0, width]);
+
+    var y2 = d3.scaleLinear()
+      .domain([0, 55000])
+      .range([height, 0]);
+
+    // create bars (rects)
+    barchart.selectAll(".bar")
+      .data(school_type_data)
+      .enter().append("rect")
+      .attr("class", "bar")
+      .attr("x", function(d) { return x2(d.type) + 10; })
+      .attr("width", x2.bandwidth() - 20)  //add separation between bars
+      .attr("y", function(d) { return y2(d.salary); })
+      .attr("height", function(d) { return height - y2(d.salary); });
+
+    var xAxis2 = d3.axisBottom(x2);
+    var yAxis2 = d3.axisLeft(y2);
+
+    barchart.append('g')
+      .attr('transform', 'translate(0,0)')
+      .call(yAxis2);
+
+    barchart.append("g")
+      .attr("class", "x axis")
+      .attr("transform", "translate(0," + height + ")")
+      .call(xAxis2);
+
+    barchart.append("g")
+      .attr("class", "y axis")
+      .call(yAxis2);
+
+  // add x axis label
+  barchart.append('text')
+    .attr('transform', "translate(" + (width/2) + " ," + (height + 40) + ")")
+    .style('text-anchor', 'middle')
+    .text("School Type")
+    .attr("font-family", "Helvetica")
+
+  // add y axis label
+  barchart.append('text')
+    .attr('transform', "rotate(-90)")
+    .attr("y", 0 - margin2.left)
+    .attr("x",0 - (height / 2))
+    .attr("dy", "1em")
+    .style('text-anchor', 'middle')
+    .text("Average Early Career Salary ($)")
+    .attr("font-family", "Helvetica")
+
+  //add title to scatterplot
+  barchart.append('text')
+    .attr("x", width/2)
+    .attr("y", 0 - margin2.top/2)
+    .style('text-anchor', 'middle')
+    .text("Does it pay to go Private?")
+    .attr("font-family", "Helvetica")
+    .attr("font-size", "25px")
+
+  // add labels bar values
+  barchart.append('text')
+    .attr("x", width/2 - 70)
+    .attr("y", 54 - margin2.top/2)
+    .style('text-anchor', 'middle')
+    .text("$50,076")
+    .attr("font-family", "Helvetica")
+    .attr("font-size", "10px")
+
+  barchart.append('text')
+    .attr("x", width/2 + 70)
+    .attr("y", 43 - margin2.top/2)
+    .style('text-anchor', 'middle')
+    .text("$51,639")
+    .attr("font-family", "Helvetica")
+    .attr("font-size", "10px")
+
+</script>
+
+<body>
+  <p>I can add more text here</p>
+</body>
+
+
+<script src="https://d3js.org/d3.v4.js"></script>
+<script src="https://unpkg.com/d3-simple-slider"></script>
+
+
+</body>
+</html>
+margin22

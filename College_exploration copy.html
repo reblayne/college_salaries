@@ -1,0 +1,322 @@
+<!doctype html>
+<!-- Sidra Ijaz & Rebecca Layne -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="author" content="Sidra Ijaz & Rebecca Layne">
+
+  <title>A4 - Colleges the Pay OFF </title>
+  <style>
+  h2{
+    font-size: 40px;
+    font-family: Helvetica, sans-serif;
+  }
+  button {
+    padding:10px 30px;
+    border-radius:30px;
+    border:none;
+    font-weight: bold;
+    margin: 5px;
+    color: black;
+  }
+  h1 {
+    font-size: 50px;
+    font-family: Helvetica, sans-serif;
+  }
+  button#state {
+    background-color: red
+  }
+  button#engineering {
+    background-color: orange
+  }
+  button#arts {
+    background-color: blue
+  }
+  button#ivy {
+    background-color: green
+  }
+  button#all {
+    background-color: gray
+  }
+  #risk{
+    font-size: 20px;
+    font-family: Helvetica, sans-serif;
+  }
+  #box{
+    border-style: : solid;
+    border-color: black;
+    border-radius: 1
+  }
+  p, label{
+    text-align: center;
+    font-weight: bold;
+    font-family: Helvetica, sans-serif;
+
+  }
+  body{
+    text-align: center;
+  }
+  .ticks {
+  font: 15px sans-serif;
+}
+
+.track,
+.track-inset,
+.track-overlay {
+  stroke-linecap: round;
+}
+
+.track {
+  stroke: #000;
+  stroke-opacity: 0.3;
+  stroke-width: 10px;
+}
+
+.track-inset {
+  stroke: #ddd;
+  stroke-width: 8px;
+}
+
+.track-overlay {
+  pointer-events: stroke;
+  stroke-width: 50px;
+  stroke: transparent;
+  cursor: crosshair;
+}
+
+.handle {
+  fill: #ffffff;
+  stroke: #000;
+  stroke-opacity: 0.5;
+  stroke-width: 1.25px;
+
+}
+</style>
+<!--   This is where you should import your style sheet  -->
+<!--  <link rel="stylesheet" href="css/styles.css?v=1.0"> -->
+<script src="https://d3js.org/d3.v5.min.js"></script>
+</head>
+
+<body>
+  <h2>Colleges ... Title here</h2>
+  <section id = "box">
+    <span id = "Type"> Type: </span>
+    <button id="state" data-filter="State" > State</button>
+    <button id="engineering" data-filter="Engineering"> Engineering</button>
+    <button id="arts" data-filter="Liberal Arts"> Liberal Arts</button>
+    <button id="ivy" data-filter="Ivy League"> Ivy League</button>
+    <button id="gray" data-filter=""> All</button>
+  </section>
+  <p>Move the purple and blue dots to begin filtering out resteraunts by location distance!</p>
+  <p>Drag the sliders below to adjust the radii of each location!</p>
+  <div id="visualization_area"></div>
+
+  <script src="https://d3js.org/d3-array.v1.min.js"></script>
+  <script src="https://d3js.org/d3-geo.v1.min.js"></script>
+
+  <script>
+  var college_data = []; //global variable to store collee data
+
+  var restaurant_position_data = [];  //set global data to store restaurant data
+  var currButton = "All"; // current button pressed
+  var currIntersectedData = [];  //keeps track of data points in the intersection
+  x1 = 0  //keep track of coordinates of location A and B
+  y1 = 0
+  x2 = 0
+  y2 = 0
+  r1 = 0
+  r2 = 0
+
+
+
+
+    setTimeout(function() {
+    }, 3000);
+
+
+
+
+  //Create scatter plot --> referenced http://bl.ocks.org/weiglemc/6185069
+  // also referenced http://bl.ocks.org/bunkat/2595950
+  // Set up size
+  var margin = {top: 20, right: 20, bottom: 30, left: 40},
+      width = 960 - margin.left - margin.right,
+      height = 500 - margin.top - margin.bottom;
+
+  // setup x
+  var x = d3.scaleLinear()
+    //  .domain([0, d3.max(college_data, function(d) {return d["starting_salary"]})])
+      .domain([30000, 80000])  //  .domain([0, d3.max(data, function(d) { return d[0]; })])
+      .range([0, width]);
+
+  var y = d3.scaleLinear()
+      .domain([0, 75000])
+      .range([height, 0]);
+
+
+  /* Add an SVG element to the DOM*/
+  var scatterplot = d3.select('body').append('svg')
+  .attr('width', width + margin.left + margin.right)  //add room on the right side of page for sliders
+  .attr('height', height + margin.top + margin.bottom)
+  .attr('class', 'scatterplot');
+
+  var main = scatterplot.append('g')
+	.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
+	.attr('width', width)
+	.attr('height', height)
+	.attr('class', 'main')
+
+   // add x axis
+   var xAxis = d3.axisBottom(x); //.tickFormat(function(d){ return d.starting_salary;});;
+
+   main.append('g')
+  	.attr('transform', 'translate(0,' + height + ')')
+  	.attr('class', 'main axis date')
+  	.call(xAxis);
+
+    // add y axis
+    var yAxis = d3.axisLeft(y);
+
+    main.append('g')
+  	.attr('transform', 'translate(0,0)')
+  	.attr('class', 'main axis date')
+  	.call(yAxis);
+
+
+
+    var g = main.append("g");
+
+    // g.selectAll("scatter-dots")
+    //     .data(college_data)
+    //     .enter().append("svg:circle")
+    //     .attr("cx", function (d,i) { return x(d.starting_salary); } )
+    //     .attr("cy", function (d) { return y(d.cost); } )
+    //     .attr("r", 5);
+
+
+
+        //load in data
+        /*Store data set of restaurants*/
+        d3.csv("US_College_Data_Final copy.csv", parseRowInput).then(load);  //parse and load data
+        // load data in
+        function parseRowInput(d) {
+          return {
+            school_name: d["School Name"],
+            city: d["City"],
+            cost: d["Average Cost of Attendence"],
+            starting_salary: d["Starting Median Salary"],
+            school_type: d["School Type"]
+          };
+        }
+
+        /*Plot data points on map*/
+        function load(data) {
+          college_data = data;
+          console.log(college_data[1]["cost"])
+          //console.log(college_data["Average Cost of Attendence"])
+          console.log(college_data)
+          g.selectAll("ellipse")
+          .data(college_data)
+          .enter()
+          .append("ellipse")
+          .attr("rx",	3)
+          .attr("ry", 3)
+          .attr("cx", function(d,i) { return x(d.starting_salary)})
+          .attr("cy", function(d) {
+            console.log(d.cost)
+            return y(d.cost)})
+
+          .style("fill", function(d) {
+            if (d.school_type == "State") {
+              return "red"
+            } else if (d.school_type == "Engineering") {
+              return "orange"
+            } else if (d.school_type == "Liberal Arts") {
+              return "blue"
+            } else if (d.school_type == "Ivy League") {
+              return "green"
+            }
+          }
+        );
+        }
+
+
+
+        // .on('mouseover', function () {
+        //       d3.select(this)
+        //         .transition()
+        //         .duration(500)
+        //         .attr('r',20)
+        //         .attr('stroke-width',3)
+        //     })
+        //     .on('mouseout', function () {
+        //       d3.select(this)
+        //         .transition()
+        //         .duration(500)
+        //         .attr('r',10)
+        //         .attr('stroke-width',1)
+        //     })
+
+
+
+    /*Keeps track of what button is clicked and calls filter function*/
+    let buttons = d3.selectAll("button");
+    buttons.on("click", function() {
+      let selectedButton = this.dataset.filter; //value of data-filter
+      if (selectedButton == "State") {
+        currButton = "State"
+      } else if (selectedButton == "Engineering") {
+        currButton = "Engineering"
+      } else if (selectedButton == "Liberal Arts") {
+        currButton = "Liberal Arts"
+      } else if (selectedButton == "Ivy League") {
+        currButton = "Ivy League"
+      }
+      else {
+        currButton = "All"
+      }
+      filterByRiskCategory(currButton) //filter data based on button and intersection
+    })
+
+
+    /*Update points that appear on map*/
+    function updateGraph(filteredData) {
+      let circles = svg.selectAll("ellipse")
+      let updatedCircles = circles.data(filteredData, d => d.id) //
+      .style("fill", function(d) {
+        if (d.risk_category == "High Risk") {
+          return "red"
+        } else if (d.risk_category == "Moderate Risk") {
+          return "orange"
+        } else if (d.risk_category == "Low Risk") {
+          return "green"
+        }
+      });
+      let enterSelection = updatedCircles.enter();
+      let newCircles = enterSelection.append("ellipse")
+      .attr("rx", 3)
+      .attr("ry", 3)
+      .attr("cx",	function(d)	{	return d.x;	})
+      .attr("cy",	function(d)	{	return d.y;	})
+      .style("fill", function(d) {
+        if (d.risk_category == "High Risk") {
+          return "red"
+        } else if (d.risk_category == "Moderate Risk") {
+          return "orange"
+        } else if (d.risk_category == "Low Risk") {
+          return "green"
+        }
+      });
+      let unselectedCircles = updatedCircles.exit();
+      updatedCircles.exit().remove();
+    }
+
+
+
+    </script>
+
+  </script>
+
+
+</body>
+</html>
